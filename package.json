@@ -1,0 +1,12 @@
+{
+  "name": "elph",
+  "version": "1.0.0",
+  "description": "Elph's javascript client side SDK",
+  "main": "provider.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tanooj Luthra <tanooj@elph.com> (https://elph.com)",
+  "license": "ISC",
+  "devDependencies": {}
+}

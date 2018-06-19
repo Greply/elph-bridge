@@ -1,0 +1,177 @@
+<html lang="en">
+<head>
+    <script src="web3.min.js"></script>
+    <script src="lightwallet.min.js"></script>
+</head>
+<body>
+    <button onclick='initWeb3()' style="background-color:rgb(74, 144, 226); height:3.25em; width:150px; padding: 0.46em 0em; color:white; font-family:'Open Sans', 'Helvetica', 'Arial', sans-serif; border-radius:6px; border:none;font-size:11px;font-weight:700">"Login with Elph"</button>
+
+    <script>
+        var web3 = new Web3(new Web3.providers.HttpProvider('https://ropsten.infura.io/wxolU88UXbw7sTfEFgK2'))
+
+        var seedPhrase = 'shy option much miss jazz refuse benefit struggle diet rotate syrup debate';
+        var password = 'password';
+
+        function getPrivateKey(seedPhrase, password) {
+            return new Promise(resolve => {
+                lightwallet.keystore.createVault({
+                                password: password,
+                                seedPhrase: seedPhrase,
+                                hdPathString: 'm/44\'/60\'/0\'/0'
+                            }, function (err, ks) {
+                                ks.keyFromPassword(password, function (err, pwDerivedKey) {
+                                    if (err) {
+                                        reject(err);
+                                        return;
+                                    }
+
+                                    // Generate a new address/private key pairs
+                                    ks.generateNewAddress(pwDerivedKey, 1);
+                                    var privateKey = ks.exportPrivateKey(ks.getAddresses()[0], pwDerivedKey);
+                                    console.log("private key: ", privateKey);
+                                    resolve(privateKey);
+                                });
+                            });
+            });
+        }
+
+        async function initWeb3() {
+            var privateKey = await getPrivateKey(seedPhrase, password); 
+            var accounts = web3.eth.accounts;
+            accounts.wallet.add(accounts.privateKeyToAccount('0x'+ privateKey));
+            console.log("AUTHENTICATING")
+            window.parent.postMessage({ type: "AUTHENTICATED" }, '*');
+        }
+        
+    </script>
+
+    <script>
+        function sendResult(payload, error, result) {
+            var fullResult = {
+                jsonrpc: "2.0",
+                id: payload.id,
+                result: result
+            }
+            console.log("sending result: ", payload.id, "error:", error, "fullResult:", fullResult);
+            window.parent.postMessage({ type: "RESULT", payload: payload, error: error, result: fullResult }, '*');
+        }
+
+        function handleRequest(payload) {
+            console.log("method: ", payload.method, 'args: ', payload.params)
+            var method = payload.method;
+            var args = payload.params;
+            switch(method) {
+                case "web3_clientVersion":
+                    sendResult(payload, null, 'Elph/MetaMask/v4.5.5')
+                    break;
+                case "net_version":
+                    // "1": Ethereum Mainnet
+                    // "2": Morden Testnet (deprecated)
+                    // "3": Ropsten Testnet
+                    // "4": Rinkeby Testnet
+                    // "42": Kovan Testnet
+
+                    sendResult(payload, null, "3");
+                    break;
+                case "net_listening":
+                    sendResult(payload, null, true);
+                    break;
+                case "net_peerCount":
+                    web3.net.getPeerCount(function(err, peerCount) {
+                        sendResult(payload, err, peerCount);
+                    });
+                    break;
+                case "eth_coinbase":
+                    sendResult(payload, null, web3.utils.toChecksumAddress(web3.eth.accounts.wallet[0].address));
+                    break;
+                case "eth_accounts":
+                    sendResult(payload, null,
+                        [
+                            web3.eth.accounts.wallet[0].address,
+                            web3.utils.toChecksumAddress(web3.eth.accounts.wallet[0].address),
+                            web3.eth.accounts.wallet[0].address.toLowerCase(),
+                            web3.eth.accounts.wallet[0].address.toUpperCase()
+                        ]
+                    )
+                    break;
+                case "eth_gasPrice":
+                    web3.eth.getGasPrice(function(err, gasPrice) {
+                        sendResult(payload, err, gasPrice);
+                    });
+                    break;
+                case "eth_blockNumber":
+                    web3.eth.getBlockNumber(function(err, blockNumber) {
+                        sendResult(payload, err, blockNumber);
+                    });
+                    break;
+                case "eth_getBalance":
+                    web3.eth.getBalance(args[0], args[1], function (err, balance) {
+                        sendResult(payload, err, balance);
+                    });
+                    break;
+                case "eth_getTransactionCount":
+                    web3.eth.getTransactionCount(args[0], args[1], function(err, txCount) {
+                        sendResult(payload, err, txCount);
+                    });
+                    break;
+                case "eth_getCode":
+                    web3.eth.getCode(args[0], args[1], function(err, code) {
+                        sendResult(payload, err, code);
+                    });
+                    break;
+                case "eth_call":
+                    web3.eth.call(args[0], args[1], function(err, result) {
+                        sendResult(payload, err, result);
+                    });                
+                    break;
+                case "eth_sendTransaction":
+                    web3.eth.sendTransaction(Object.assign(args[0], {gas: 400000 }), function(err, hash) {
+                        sendResult(payload, err, hash);
+                    });
+                    break;
+                case "eth_estimateGas":
+                    web3.eth.estimateGas(args[0], function (err, gas) {
+                        sendResult(payload, err, gas);
+                    });
+                    break;
+                case "eth_getBlockByNumber":
+                    var block = args[0] === "latest" ? "latest" : web3.utils.hexToNumber(args[0])
+                    web3.eth.getBlock(block, args[1] || false, function(err, blockObj) {
+                        sendResult(payload, err, blockObj);
+                    });
+                    break;
+                case "eth_getBlockByHash":
+                    web3.eth.getBlock(args[0], args[1] || false, function(err, blockObj) {
+                        sendResult(payload, err, blockObj);
+                    });
+                    break;
+                case "eth_getTransactionByHash":
+                    web3.eth.getTransaction(args[0], function(err, tx) {
+                        sendResult(payload, err, tx);
+                    });
+                    break;
+                case "eth_getTransactionReceipt":
+                    web3.eth.getTransactionReceipt(args[0], function(err, txReceipt) {
+                        sendResult(payload, err, txReceipt);
+                    });
+                    break;
+                case "eth_getLogs":
+                    web3.eth.getPastLogs(args, function(err, pastLogs) {
+                        sendResult(payload, err, pastLogs);
+                    });
+                    break;
+                case "eth_sign":
+                    // TODO
+                    break;
+            }
+        }
+    </script>
+
+    <script>
+        // Listen to messages from parent window
+        window.addEventListener('message', function (e) {
+            handleRequest(e.data.payload);
+        });
+    </script>
+</body>
+</html>

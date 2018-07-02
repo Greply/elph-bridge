@@ -3,13 +3,16 @@ var ELPH_ORIGIN = 'http://127.0.0.1:9000';
 function ElphProvider() {
    this.authenticated = false;
    this.requests = {};
+   this.subscriptions = {};
    this.account = undefined;
    this.net_version = undefined;
    this.initializeListener();
    this.initializeIframe();
    this.initializeModalFrame(); 
 }
-
+ElphProvider.prototype.on = function(type, callback) { 
+    console.log("Prototype ON: ", type, callback);
+};
 ElphProvider.prototype.initializeListener = function () {
     var that = this;
     window.addEventListener('message', function(e) {
@@ -24,7 +27,7 @@ ElphProvider.prototype.initializeListener = function () {
             } else if (e.data.type === "RESULT") {
                 var callback = that.requests[e.data.payload.id].callback;
                 if (e.data.error) {
-                    callback(new Error(e.data.error), null);                    
+                    callback(e.data.error, null);                    
                 } else {
                     callback(null, e.data.result);
                 }

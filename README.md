@@ -30,7 +30,27 @@ Demo includes bundle.js (a wrapper around provider.js.  The provider.js loads up
 
 # Dev Setup (run local sdk-demo):
 
+## Option 1: All-in-one script:
+
+Run this the first time:
+> git clone git@github.com:ElphDev/sdk-demo.git
+
+Run this the first time:
+> git clone git@github.com:ElphDev/sdk.git
+
+Run this the first time:
+> npm install --global rollup
+
+Each time you want to bring up the dev environment, run:
+> cd sdk
+
+> foreman start
+
+## Option 2: If you want to manually execute individual steps in separate terminal windows:
+
 (1) Terminal Tab 1: SDK-DEMO
+
+Run this the first time:
 > git clone git@github.com:ElphDev/sdk-demo.git
 
 > cd sdk-demo/
@@ -42,13 +62,19 @@ Demo includes bundle.js (a wrapper around provider.js.  The provider.js loads up
 (2) Terminal Tab 2:
 > cd web/
 
+This assumes you have set up the necessary dependencies (yarn, Postgres etc)
+as specified in the web/ README file.
 > foreman start -p 9000
 
 (3) Terminal Tab 3:
-> cd sdk/
 
-Install this the first time:
+Run this the first time:
+> git clone git@github.com:ElphDev/sdk-demo.git
+
+Run this the first time:
 > npm install --global rollup
+
+> cd sdk/
 
 This compiles provider.js and builds ./dist/bundle.js every two seconds:
 > while true; do rollup provider.js --file ./dist/bundle.js --format iife --name "Elph"; sleep 2; done

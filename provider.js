@@ -1,6 +1,11 @@
 var ELPH_ORIGIN = 'http://127.0.0.1:9000';
 
-function ElphProvider() {
+function ElphProvider(options={'network' : 'mainnet'}) {
+   this.options = options;
+   // Just to prevent any kind of caching (and to force
+   // fetching newest results).
+   Object.assign(options, {'date' : Date.now().toString()});
+
    this.authenticated = false;
    this.requests = {};
    this.subscriptions = {};
@@ -10,6 +15,13 @@ function ElphProvider() {
    this.initializeIframe();
    this.initializeModalFrame(); 
 }
+
+ElphProvider.prototype.serializeOptions = function() {
+    var that = this;
+    return Object.keys(this.options).map(function(arg){
+        return arg + '=' + that.options[arg]
+    }).join("&")
+};
 ElphProvider.prototype.on = function(type, callback) { 
     console.log("Prototype ON: ", type, callback);
 };
@@ -49,7 +61,7 @@ ElphProvider.prototype.initializeModalFrame = function () {
     }
 
     this.modalIframe = document.createElement('iframe');
-    this.modalIframe.src = ELPH_ORIGIN + "/iframe2.html?" + Date.now().toString()
+    this.modalIframe.src = ELPH_ORIGIN + "/sdk/modal_iframe?" + this.serializeOptions()
     this.modalIframe.style.position = "absolute";
     this.modalIframe.style.border = 0;
     this.modalIframe.style.top = 0;
@@ -72,7 +84,7 @@ ElphProvider.prototype.initializeIframe = function () {
     }
 
     this.iframe = document.createElement('iframe');
-    this.iframe.src = ELPH_ORIGIN + "/iframe.html?" + Date.now().toString()
+    this.iframe.src = ELPH_ORIGIN + "/sdk/web3_iframe?" + this.serializeOptions()
     this.iframe.style.border = 0;
     this.iframe.style.position = "absolute";
     this.iframe.style.height = 0;

@@ -29,8 +29,9 @@ Demo includes bundle.js (a wrapper around provider.js.  The provider.js loads up
 ---
 
 Notes
-- demo needs to run on 127.0.0.1:8000
-- sdk needs to run on 127.0.0.1:9000
+- demo needs to run on 127.0.0.1:8888
+- sdk needs to run on 127.0.0.1:8000
+- rails needs to run on 127.0.0.1:9000
 - bundle.js needs to be included on every page because web3 needs to be on every page
 - on page redirects we need to use some kind of local storage to keep the seed around
 - login window needs to talk back somehow

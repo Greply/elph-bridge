@@ -43,6 +43,7 @@ ElphProvider.prototype.initializeListener = function () {
                 } else {
                     callback(null, e.data.result);
                 }
+                delete that.requests[e.data.payload.id];
             } else if (e.data.type === "SHOW_MODAL_IFRAME") {
                 // console.log("Should have opened modal iframe");
                 this.modalIframe.style.display = 'block';

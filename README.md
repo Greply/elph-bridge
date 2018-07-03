@@ -1,4 +1,4 @@
-General flow of things
+# General flow:
 
 Demo includes bundle.js (a wrapper around provider.js.  The provider.js loads up iframe.html (the actual web3 frame and login button), and iframe2.html (the modal confirmation iframe))
 
@@ -28,23 +28,61 @@ Demo includes bundle.js (a wrapper around provider.js.  The provider.js loads up
 
 ---
 
-Notes
-- demo needs to run on 127.0.0.1:8888
-- sdk needs to run on 127.0.0.1:8000
-- rails needs to run on 127.0.0.1:9000
-- bundle.js needs to be included on every page because web3 needs to be on every page
-- on page redirects we need to use some kind of local storage to keep the seed around
-- login window needs to talk back somehow
+# Dev Setup (run local sdk-demo):
+
+(1) Terminal Tab 1: SDK-DEMO
+> git clone git@github.com:ElphDev/sdk-demo.git
+
+> cd sdk-demo/
+
+> python -m SimpleHTTPServer 8888
+
+> Open http://localhost:8888/ and click on 'demo.html'
+
+(2) Terminal Tab 2:
+> cd web/
+
+> foreman start -p 9000
+
+(3) Terminal Tab 3:
+> cd sdk/
+
+Install this the first time:
+> npm install --global rollup
+
+This compiles provider.js and builds ./dist/bundle.js every two seconds:
+> while true; do rollup provider.js --file ./dist/bundle.js --format iife --name "Elph"; sleep 2; done
+
+Start HTTPServer:
+> python -m SimpleHTTPServer 8000
 
 ---
 
-To run in demo:
-- Load extension unpacked
-- Go to etherbots.io
-- See it needs metamask to connect
-- Click "Injecta" extention
-- See the "Login with Elph" button show up in top right
-- Click it
-- Connect to web3
-- Reattempt to go to etherbots.io
-- Magic.
+# Test SDK on a real dApp (talk to Tanooj first):
+
+(1) Load extension unpacked
+
+(2) Go to etherbots.io
+
+(3) See it needs metamask to connect
+
+(4) Click "Inject" extention
+
+(5) See the "Login with Elph" button show up in top right
+
+(6) Click it
+
+(7) Connect to web3
+
+(8) Reattempt to go to etherbots.io
+
+(9) Magic.
+
+---
+
+# Notes:
+- The script bundle.js needs to be included on every page because web3 needs to be on every page.
+- On page redirects, we need to use some kind of local storage to keep the seed around.
+- Login window needs to talk back somehow.
+
+---

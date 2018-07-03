@@ -1,19 +1,19 @@
 var ELPH_ORIGIN = 'http://127.0.0.1:9000';
 
 function ElphProvider(options={'network' : 'mainnet'}) {
-   this.options = options;
-   // Just to prevent any kind of caching (and to force
-   // fetching newest results).
-   Object.assign(options, {'date' : Date.now().toString()});
+    this.options = options;
+    // Just to prevent any kind of caching (and to force
+    // fetching newest results).
+    Object.assign(this.options, {'date' : Date.now().toString()});
 
-   this.authenticated = false;
-   this.requests = {};
-   this.subscriptions = {};
-   this.account = undefined;
-   this.net_version = undefined;
-   this.initializeListener();
-   this.initializeIframe();
-   this.initializeModalFrame(); 
+    this.authenticated = false;
+    this.requests = {};
+    this.subscriptions = {};
+    this.account = undefined;
+    this.net_version = undefined;
+    this.initializeListener();
+    this.initializeIframe();
+    this.initializeModalFrame();
 }
 
 ElphProvider.prototype.serializeOptions = function() {

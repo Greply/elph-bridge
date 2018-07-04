@@ -1,4 +1,5 @@
 var ELPH_ORIGIN = 'http://127.0.0.1:9000';
+var SDK_ELPH_ORIGIN = 'http://sdk.lvh.me:9000';
 
 function ElphProvider(options={'network' : 'mainnet'}) {
     this.options = options;
@@ -29,7 +30,7 @@ ElphProvider.prototype.initializeListener = function () {
     var that = this;
     window.addEventListener('message', function(e) {
         // TODO: add event origin check here.
-        if (e.origin === ELPH_ORIGIN) {
+        if (e.origin === SDK_ELPH_ORIGIN) {
             console.log("Received message: ", e);
             if (e.data.type === "AUTHENTICATED") {
                 that.authenticated = true;
@@ -62,7 +63,7 @@ ElphProvider.prototype.initializeModalFrame = function () {
     }
 
     this.modalIframe = document.createElement('iframe');
-    this.modalIframe.src = ELPH_ORIGIN + "/sdk/modal_iframe?" + this.serializeOptions()
+    this.modalIframe.src = SDK_ELPH_ORIGIN + "/modal-iframe?" + this.serializeOptions()
     this.modalIframe.style.position = "absolute";
     this.modalIframe.style.border = 0;
     this.modalIframe.style.top = 0;
@@ -85,7 +86,7 @@ ElphProvider.prototype.initializeIframe = function () {
     }
 
     this.iframe = document.createElement('iframe');
-    this.iframe.src = ELPH_ORIGIN + "/sdk/web3_iframe?" + this.serializeOptions()
+    this.iframe.src = SDK_ELPH_ORIGIN + "/web3-iframe?" + this.serializeOptions()
     this.iframe.style.border = 0;
     this.iframe.style.position = "absolute";
     this.iframe.style.height = 0;
@@ -135,7 +136,7 @@ ElphProvider.prototype.sendMessage = function (payload) {
         }, 1000);
     } else {
         console.log("Sending payload: ", payload);
-        this.iframe.contentWindow.postMessage(payload, ELPH_ORIGIN)            
+        this.iframe.contentWindow.postMessage(payload, SDK_ELPH_ORIGIN);
     }
 };
 

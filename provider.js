@@ -5,7 +5,7 @@ function ElphProvider(options={'network' : 'mainnet'}) {
     this.options = options;
     // Just to prevent any kind of caching (and to force
     // fetching newest results).
-    // Object.assign(this.options, {'date' : Date.now().toString()});
+    Object.assign(this.options, {'date' : Date.now().toString()});
 
     this.authenticated = false;
     this.requests = {};
@@ -14,6 +14,7 @@ function ElphProvider(options={'network' : 'mainnet'}) {
     this.net_version = undefined;
     this.initializeListener();
     this.initializeIframe();
+    this.initializeModalFrame();
 }
 
 ElphProvider.prototype.serializeOptions = function() {
@@ -23,7 +24,7 @@ ElphProvider.prototype.serializeOptions = function() {
     }).join("&")
 };
 ElphProvider.prototype.on = function(type, callback) { 
-    // console.log("Prototype ON: ", type, callback);
+    console.log("Prototype ON: ", type, callback);
 };
 ElphProvider.prototype.initializeListener = function () {
     var that = this;
@@ -31,10 +32,7 @@ ElphProvider.prototype.initializeListener = function () {
         // TODO: add event origin check here.
         if (e.origin === SDK_ELPH_ORIGIN) {
             console.log("Received message: ", e);
-            if (e.data.type === "GET_OPTIONS") {
-                console.log("GET_OPTIONS", that.iframe);
-                that.iframe.contentWindow.postMessage({ type: "SET_OPTIONS", payload: that.options }, SDK_ELPH_ORIGIN);
-            } else if (e.data.type === "AUTHENTICATED") {
+            if (e.data.type === "AUTHENTICATED") {
                 that.authenticated = true;
                 that.account = e.data.account;
                 that.net_version = e.data.net_version;
@@ -48,16 +46,35 @@ ElphProvider.prototype.initializeListener = function () {
                 }
                 delete that.requests[e.data.payload.id];
             } else if (e.data.type === "SHOW_MODAL_IFRAME") {
-                console.log("Should have opened modal iframe", that.iframe);
-                that.iframe.style.display = 'block';
+                // console.log("Should have opened modal iframe");
+                this.modalIframe.style.display = 'block';
             } else if (e.data.type === "HIDE_MODAL_IFRAME") {
-                console.log("Should have closed modal iframe", that.iframe);
-                that.iframe.style.display = 'none';
+                // console.log("Should have closed modal iframe");
+                this.modalIframe.style.display = 'none';
             } else {
                 console.log("got an unknown response back: ", e.data.type);
             }
         }
     });
+};
+ElphProvider.prototype.initializeModalFrame = function () {
+    if (document.getElementById('modalIframe')) {
+        return true;
+    }
+
+    this.modalIframe = document.createElement('iframe');
+    this.modalIframe.src = SDK_ELPH_ORIGIN + "/modal-iframe?" + this.serializeOptions()
+    this.modalIframe.style.position = "absolute";
+    this.modalIframe.style.border = 0;
+    this.modalIframe.style.top = 0;
+    this.modalIframe.style.left = 0;
+    this.modalIframe.style.width = '100%';
+    this.modalIframe.style.height = '100%';
+    this.modalIframe.style.display = 'none';
+    this.modalIframe.style.zIndex = '10000000';
+    this.modalIframe.allowTransparency="true";
+    this.modalIframe.id = "modalIframe";
+    document.body.appendChild(this.modalIframe);
 };
 ElphProvider.prototype.initializeIframe = function () {
     if (!localStorage.getItem('elphAuthenticated')) {
@@ -69,16 +86,12 @@ ElphProvider.prototype.initializeIframe = function () {
     }
 
     this.iframe = document.createElement('iframe');
-    this.iframe.src = SDK_ELPH_ORIGIN + "/web3-iframe"
-    this.iframe.style.position = "absolute";
+    this.iframe.src = SDK_ELPH_ORIGIN + "/web3-iframe?" + this.serializeOptions()
     this.iframe.style.border = 0;
-    this.iframe.style.top = 0;
-    this.iframe.style.left = 0;
-    this.iframe.style.width = '100%';
-    this.iframe.style.height = '100%';
-    this.iframe.style.display = 'none';
-    this.iframe.style.zIndex = '10000000';
-    this.iframe.allowTransparency="true";
+    this.iframe.style.position = "absolute";
+    this.iframe.style.height = 0;
+    this.iframe.style.width = 0;
+    this.iframe.style.zIndex = -100;
     this.iframe.id = "web3Iframe";
     document.body.appendChild(this.iframe);
 };
@@ -91,7 +104,6 @@ ElphProvider.prototype.send = function (payload) {
     var result;
     switch(method) {
         case "eth_accounts":
-            console.log("eth_accounts sync");
             result = this.account ? [this.account] : []
             break;
         case "eth_coinbase":

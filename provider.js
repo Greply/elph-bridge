@@ -82,7 +82,7 @@ ElphProvider.prototype.initializeModalFrame = function () {
 };
 ElphProvider.prototype.initializeIframe = function () {
     if (!localStorage.getItem('elphAuthenticated')) {
-        window.open(ELPH_ORIGIN + '/register', '_blank');
+        window.open(ELPH_ORIGIN + '/register','register','resizable,height=650,width=850');
     }
 
     if (document.getElementById('web3Iframe')) {

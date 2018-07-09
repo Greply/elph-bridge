@@ -11,6 +11,7 @@ function ElphProvider(options={'network' : 'mainnet'}) {
     this.net_version = undefined;
     this.initializeListener();
     this.initializeIframe();
+    this.initializeModalFrame();
 }
 
 ElphProvider.prototype.serializeOptions = function() {
@@ -49,16 +50,35 @@ ElphProvider.prototype.initializeListener = function () {
                     that.subscriptions[i](e.data.result);
                 }
             } else if (e.data.type === "SHOW_MODAL_IFRAME") {
-                console.log("Should have opened modal iframe", that.iframe);
-                that.iframe.style.display = 'block';
+                console.log("Should have opened modal iframe", that.modalIframe);
+                that.modalIframe.style.display = 'block';
             } else if (e.data.type === "HIDE_MODAL_IFRAME") {
-                console.log("Should have closed modal iframe", that.iframe);
-                that.iframe.style.display = 'none';
+                console.log("Should have closed modal iframe", that.modalIframe);
+                that.modalIframe.style.display = 'none';
             } else {
                 console.log("got an unknown response back: ", e.data.type);
             }
         }
     });
+};
+ElphProvider.prototype.initializeModalFrame = function () {    
+    if (document.getElementById('modalIframe')) {  
+        return true;   
+    }  
+   
+    this.modalIframe = document.createElement('iframe');   
+    this.modalIframe.src = SDK_ELPH_ORIGIN + "/modal-iframe?" + Date.now().toString()
+    this.modalIframe.style.position = "absolute";  
+    this.modalIframe.style.border = 0; 
+    this.modalIframe.style.top = 0;    
+    this.modalIframe.style.left = 0;   
+    this.modalIframe.style.width = '100%'; 
+    this.modalIframe.style.height = '100%';
+    this.modalIframe.style.display = 'none';   
+    this.modalIframe.style.zIndex = '10000000';    
+    this.modalIframe.allowTransparency="true"; 
+    this.modalIframe.id = "modalIframe";   
+    document.body.appendChild(this.modalIframe);   
 };
 ElphProvider.prototype.initializeIframe = function () {
     if (!localStorage.getItem('elphAuthenticated')) {
@@ -71,15 +91,11 @@ ElphProvider.prototype.initializeIframe = function () {
 
     this.iframe = document.createElement('iframe');
     this.iframe.src = SDK_ELPH_ORIGIN + "/web3-iframe?" + Date.now().toString()
-    this.iframe.style.position = "absolute";
     this.iframe.style.border = 0;
-    this.iframe.style.top = 0;
-    this.iframe.style.left = 0;
-    this.iframe.style.width = '100%';
-    this.iframe.style.height = '100%';
-    this.iframe.style.display = 'none';
-    this.iframe.style.zIndex = '10000000';
-    this.iframe.allowTransparency="true";
+    this.iframe.style.position = "absolute";
+    this.iframe.style.width = 0;
+    this.iframe.style.height = 0;
+    this.iframe.style.zIndex = -100;
     this.iframe.id = "web3Iframe";
     document.body.appendChild(this.iframe);
 };

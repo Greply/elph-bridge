@@ -1,5 +1,7 @@
 var ELPH_ORIGIN = 'http://127.0.0.1:9000';
-var SDK_ELPH_ORIGIN = 'http://sdk.lvh.me:9000';
+var SDK_ELPH_ORIGIN = 'https://s3.amazonaws.com';
+var SDK_WEB3_IFRAME = SDK_ELPH_ORIGIN + '/elph-sdk/iframes/web3/web3-iframe.html';
+var SDK_MODAL_IFRAME = SDK_ELPH_ORIGIN + '/elph-sdk/iframes/modal/modal-iframe.html';
 
 function ElphProvider(options={'network' : 'mainnet'}) {
     this.options = options;
@@ -67,7 +69,7 @@ ElphProvider.prototype.initializeModalFrame = function () {
     }  
    
     this.modalIframe = document.createElement('iframe');   
-    this.modalIframe.src = SDK_ELPH_ORIGIN + "/modal-iframe?" + Date.now().toString()
+    this.modalIframe.src = SDK_MODAL_IFRAME + '?' + Date.now().toString()
     this.modalIframe.style.position = "absolute";  
     this.modalIframe.style.border = 0; 
     this.modalIframe.style.top = 0;    
@@ -90,7 +92,7 @@ ElphProvider.prototype.initializeIframe = function () {
     }
 
     this.iframe = document.createElement('iframe');
-    this.iframe.src = SDK_ELPH_ORIGIN + "/web3-iframe?" + Date.now().toString()
+    this.iframe.src = SDK_WEB3_IFRAME + '?' + Date.now().toString()
     this.iframe.style.border = 0;
     this.iframe.style.position = "absolute";
     this.iframe.style.width = 0;

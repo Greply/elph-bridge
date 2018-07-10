@@ -17,19 +17,19 @@ function getIframeVersion() {
             if (PROVIDER_VERSION in json) {
                 let iframeVersionsList = json[PROVIDER_VERSION];
                 if (iframeVersionsList.length === 0) {
-                    reject('The iframe version list corresponding'
-                           'to PROVIDER_VERSION:',
-                           PROVIDER_VERSION, 'is empty.');
+                    reject('The iframe version list corresponding ' +
+                           'to PROVIDER_VERSION: ' +
+                           PROVIDER_VERSION + ' is empty.');
                     return;
                 }
                 resolve(iframeVersionsList[iframeVersionsList.length - 1]);
             } else {
-                reject("Invalid PROVIDER_VERSION specified:", PROVIDER_VERSION);
+                reject("Invalid PROVIDER_VERSION specified: " + PROVIDER_VERSION);
                 return;
             }
         })
         .catch(function(error) {
-            reject('Unable to fetch IFRAME_VERSION from S3:', error);
+            reject('Unable to fetch IFRAME_VERSION from S3: ' + error);
         })
     });
 }

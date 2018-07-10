@@ -1,7 +1,38 @@
+var PROVIDER_VERSION = 'v1.0.0';
 var ELPH_ORIGIN = 'http://127.0.0.1:9000';
-var SDK_ELPH_ORIGIN = 'https://sdk.elph.com';
-var SDK_WEB3_IFRAME = SDK_ELPH_ORIGIN + '/iframes/web3.html';
-var SDK_MODAL_IFRAME = SDK_ELPH_ORIGIN + '/iframes/modal.html';
+// TODO(vamsi): switch this back to https://sdk.elph.com,
+// as well as remove all occurences of '/sdk.elph.com' elsewhere
+// in the file.
+var SDK_ELPH_ORIGIN = 'https://s3.amazonaws.com'
+
+function getIframeVersion() {
+    // Note: we set <AllowedHeader>*</AllowedHeader> in the <CORSRule> of
+    // the S3 bucket for this GET to work (w.r.t. cross-origin policy).
+    return new Promise((resolve, reject) => {
+        fetch(SDK_ELPH_ORIGIN + '/sdk.elph.com/iframes/version.json')
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(json) {
+            if (PROVIDER_VERSION in json) {
+                let iframeVersionsList = json[PROVIDER_VERSION];
+                if (iframeVersionsList.length === 0) {
+                    reject('The iframe version list corresponding'
+                           'to PROVIDER_VERSION:',
+                           PROVIDER_VERSION, 'is empty.');
+                    return;
+                }
+                resolve(iframeVersionsList[iframeVersionsList.length - 1]);
+            } else {
+                reject("Invalid PROVIDER_VERSION specified:", PROVIDER_VERSION);
+                return;
+            }
+        })
+        .catch(function(error) {
+            reject('Unable to fetch IFRAME_VERSION from S3:', error);
+        })
+    });
+}
 
 function ElphProvider(options={'network' : 'mainnet'}) {
     this.options = options;
@@ -12,10 +43,15 @@ function ElphProvider(options={'network' : 'mainnet'}) {
     this.account = undefined;
     this.net_version = undefined;
     this.initializeListener();
-    this.initializeIframe();
-    this.initializeModalFrame();
-}
 
+    getIframeVersion().then(iframeVersion => {
+        this.initializeIframe(iframeVersion);
+        this.initializeModalFrame(iframeVersion);
+    })
+    .catch(err => {
+        console.error(err);
+    });
+}
 ElphProvider.prototype.serializeOptions = function() {
     var that = this;
     return Object.keys(this.options).map(function(arg){
@@ -63,13 +99,13 @@ ElphProvider.prototype.initializeListener = function () {
         }
     });
 };
-ElphProvider.prototype.initializeModalFrame = function () {    
+ElphProvider.prototype.initializeModalFrame = function (iframeVersion) {
     if (document.getElementById('modalIframe')) {  
         return true;   
     }  
    
     this.modalIframe = document.createElement('iframe');   
-    this.modalIframe.src = SDK_MODAL_IFRAME + '?' + Date.now().toString()
+    this.modalIframe.src = SDK_ELPH_ORIGIN + '/sdk.elph.com' + '/iframes/' + iframeVersion + '/modal.html?' + Date.now().toString()
     this.modalIframe.style.position = "absolute";  
     this.modalIframe.style.border = 0; 
     this.modalIframe.style.top = 0;    
@@ -82,7 +118,7 @@ ElphProvider.prototype.initializeModalFrame = function () {
     this.modalIframe.id = "modalIframe";   
     document.body.appendChild(this.modalIframe);   
 };
-ElphProvider.prototype.initializeIframe = function () {
+ElphProvider.prototype.initializeIframe = function (iframeVersion) {
     if (!localStorage.getItem('elphAuthenticated')) {
         window.open(ELPH_ORIGIN + '/register','register','resizable,height=650,width=850');
     }
@@ -92,7 +128,7 @@ ElphProvider.prototype.initializeIframe = function () {
     }
 
     this.iframe = document.createElement('iframe');
-    this.iframe.src = SDK_WEB3_IFRAME + '?' + Date.now().toString()
+    this.iframe.src = SDK_ELPH_ORIGIN + '/sdk.elph.com' + '/iframes/' + iframeVersion + '/web3.html?' + Date.now().toString()
     this.iframe.style.border = 0;
     this.iframe.style.position = "absolute";
     this.iframe.style.width = 0;

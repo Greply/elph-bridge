@@ -1,114 +1,103 @@
-# General flow:
+# [Elph](https://elph.com)
 
-Demo includes bundle.js (a wrapper around provider.js.  The provider.js loads up iframe.html (the actual web3 frame and login button), and iframe2.html (the modal confirmation iframe))
 
-- Demo calls new ElphProvider()
-- provider creates both iframes, and starts listening to all messages
-- "Login with Elph" is clicked on iframe.html
-- iframe.html initializes web3 with a seed phrase and password // TODO: ELPH API LOGIN WILL COME HERE
-- iframe.html finds iframe2.html
-- iframe2.html finds iframe.html
-- iframe.html sends an "AUTHENTICATED" back up to provider
-- provider is now ready to send web3 calls to iframe.html
-- provider sends standard calls to iframe.html with "REQUEST"
-- iframe.html forwards these calls to infura
-- iframe.html replies back to provider with "RESULT"
-- provider calls callback with result
+Elph, the new standard for decentralized apps.
 
-- provider sends conf req'd call to iframe.html with "REQUEST"
-- iframe.html realizes conf is needed, sends to iframe2.html with "CONFIRMATION"
-- iframe2.html pings provider with "SHOW_MODAL_IFRAME"
-- iframe2.html opens up modal with information
-- iframe2.html gets the user input to click on a button
-- iframe2.html pings provider with "HIDE_MODAL_IFRAME"
-- iframe2.html replies to iframe.html with "CONFIRMED" or "CANCELLED"
-- iframe.html manually checks "CONFIRMED" comes from same origin
-- iframe.html figures out what to do for each message ^
-- iframe.html follows same steps as unconf'd call.
+## How does it work?
 
----
+Elph SDK acts as a standard [web3](https://github.com/ethereum/web3.js/) provider, just like MetaMask or Mist, however doesn't require any additional downloads or installations.
 
-# Dev Setup (run local sdk-demo):
+The SDK talks to the Elph backend to handle user authentication and identity, and then bundles a client-side provider to give the most seamless experience possible for your users.
 
-## Option 1: All-in-one script:
+<hr>
 
-Run this the first time:
-> git clone git@github.com:ElphDev/sdk-demo.git
+## Security
+Security is the number one priority, and no sacrifices have been made for usability.  The Elph SDK is currently undergoing a third-party audit and is also open sourcing all the code to ensure no vulnerabilities are found.
 
-Run this the first time:
-> git clone git@github.com:ElphDev/sdk.git
+Once a user registers on Elph, their seed is generated client-side and immediately AES encrypted with a user's password.  The encrypted seed and a _hashed_ copy of the password are then stored on our backend.  Hashing the password before sending it to the Elph servers ensures that even if something were to happen to our backend the seeds would be safe and secure.
 
-Run this the first time:
-> npm install --global rollup
+Every time the user connects their Elph account to a dApp, the encrypted seed is loaded into an iframe protected by the browser's same-origin policy.  No dApp has access to the memory of the SDK and the seed is never written to disk.
 
-Each time you want to bring up the dev environment, run:
-> cd sdk
+All transactions are signed client side and then broadcasted through cloud servers, preventing Elph or the dApp from modifying any of the contents.
 
-> foreman start
+<hr>
 
-## Option 2: If you want to manually execute individual steps in separate terminal windows:
+## Installation
 
-(1) Terminal Tab 1: SDK-DEMO
+To use Elph in your dApp, the SDK must be loaded in one of the following ways:
 
-Run this the first time:
-> git clone git@github.com:ElphDev/sdk-demo.git
+### npm
 
-> cd sdk-demo/
+The recommended method of installation is through the `elph` npm package:
 
-> python -m SimpleHTTPServer 8888
+```js
+$ npm install elph
+```
 
-> Open http://localhost:8888/ and click on 'demo.html'
+### CDN
+You can also include the bundled Elph.js file hosted on jsdelivr's CDN:
 
-(2) Terminal Tab 2:
-> cd web/
+```html
+<script src="https://cdn.jsdelivr.net/npm/elph/dist/elph.min.js"></script>
+```
 
-This assumes you have set up the necessary dependencies (yarn, Postgres etc)
-as specified in the web/ README file.
-> foreman start -p 9000
+<hr>
 
-(3) Terminal Tab 3:
+## Import
 
-Run this the first time:
-> git clone git@github.com:ElphDev/sdk-demo.git
+Elph should be imported into the same part of the code where you initialize `web3`
 
-Run this the first time:
-> npm install --global rollup
+### CommonJS
+```js
+var ElphProvider = require('elph').ElphProvider;
+```
 
-> cd sdk/
+### Typescript / ES2015 (ES6)
+```js
+import { ElphProvider } from 'elph';
+```
 
-This compiles provider.js and builds ./dist/bundle.js every two seconds:
-> while true; do rollup provider.js --file ./dist/bundle.js --format iife --name "Elph"; sleep 2; done
+### CDN
+```js
+var ElphProvider = window.Elph.ElphProvider;
+```
 
-Start HTTPServer:
-> python -m SimpleHTTPServer 8000
+<hr>
 
----
+## Initialization
 
-# Test SDK on a real dApp (talk to Tanooj first):
+Once Elph has been included, you can simply initialize web3 as you would with Mist or Metamask
+```js
+web3 = new Web3(new ElphProvider())
+```
 
-(1) Load extension unpacked
+This will automatically prompt the user to register or login to Elph, and immediately allow a user to access your dApp.
 
-(2) Go to etherbots.io
+<hr>
 
-(3) See it needs metamask to connect
+## Configuration Options
 
-(4) Click "Inject" extention
+A configuration options object can be passed along when initializing the Elph provider:
 
-(5) See the "Login with Elph" button show up in top right
+```js
+web3js = new Web3(new Elph.ElphProvider({
+ network: 'ropsten'
+}));
+```
 
-(6) Click it
+### ```network```
+**Type:** `String`
 
-(7) Connect to web3
+**Default Value:**  `mainnet`
 
-(8) Reattempt to go to etherbots.io
+**Required**: ```false```
 
-(9) Magic.
+Sets the Ethereum network all web3 methods will talk to.  Following networks are supported:
+1. mainnet
+2. ropsten
+3. kovan
+4. rinkeby
 
----
+## Questions
 
-# Notes:
-- The script bundle.js needs to be included on every page because web3 needs to be on every page.
-- On page redirects, we need to use some kind of local storage to keep the seed around.
-- Login window needs to talk back somehow.
-
----
+* [Telegram](http://t.me/elphnetwork)

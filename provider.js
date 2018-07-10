@@ -1,7 +1,7 @@
 var ELPH_ORIGIN = 'http://127.0.0.1:9000';
 var SDK_ELPH_ORIGIN = 'https://s3.amazonaws.com';
-var SDK_WEB3_IFRAME = SDK_ELPH_ORIGIN + '/elph-sdk/iframes/web3/web3-iframe.html';
-var SDK_MODAL_IFRAME = SDK_ELPH_ORIGIN + '/elph-sdk/iframes/modal/modal-iframe.html';
+var SDK_WEB3_IFRAME = SDK_ELPH_ORIGIN + '/elph-sdk/iframes/web3.html';
+var SDK_MODAL_IFRAME = SDK_ELPH_ORIGIN + '/elph-sdk/iframes/modal.html';
 
 function ElphProvider(options={'network' : 'mainnet'}) {
     this.options = options;

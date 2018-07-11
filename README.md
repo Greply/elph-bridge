@@ -38,7 +38,7 @@ $ npm install elph
 You can also include the bundled Elph.js file hosted on jsdelivr's CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/elph/dist/elph.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/elph/dist/bundle.js"></script>
 ```
 
 <hr>

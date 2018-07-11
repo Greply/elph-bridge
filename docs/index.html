@@ -1,1 +1,122 @@
-<h1>Hello World!</hi>
+<html>
+    <head>
+        <title>Elph SDK Demo</title>
+        <script src="http://127.0.0.1:8000/dist/bundle.js"></script>
+        <script src="web3.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="application.css">
+    </head>
+    <body>
+        <script type="text/javascript">
+            var web3;
+            var address;
+            var balance = "...";
+            var blockNumber = "...";
+        </script>
+
+        <script type="text/javascript">
+            var getBalance = function() {
+                web3.eth.getBalance(address, function (error, tmpBalance) {
+                    balance = JSON.stringify(tmpBalance.toString(10) / (10 ** 18)) + ' ETH';
+                });
+            }
+
+            var getBlockNumber = function() {
+                web3.eth.getBlockNumber().then(function(number) {
+                    blockNumber = number;
+                });
+            }
+
+            var sendTx = function() {
+                web3.eth.sendTransaction({
+                    from: address,
+                    to: '0x1eA31d5Ee008735Cfc63dc939621101D9bC6E0a4',
+                    value: 1000000000000000,
+                    gas: 21000,
+                    chainId: 3
+                }, function (error, result) {
+                    document.getElementById('methodResult').innerHTML = "Web3 Error: [" + error + "]. Tx Hash: [" + result + "]."
+                });
+            }
+
+            var signMsg = function () {
+                web3.eth.sign("The Elph SDK is so easy to use!", address, function (error, result) {
+                    document.getElementById('methodResult').innerHTML = "Web3 Error: [" + error + "]. Signed Message: [" + result + "]."
+                });
+            }
+
+            var updateFrame = function() {
+                document.getElementById('frame').innerHTML = "" +
+                    "<p class='mb-3'>Congrats! Just like that you're connected to the Ropsten Ethereum Network.  Let's take a look at your address, balance and the latest block number on the network. It's constantly listening to new updates and is <strong>live updating!</strong></p>" +
+                    "<p class='offset-1 mb-0'>Address: <span style='font-weight: bold' id='address'></span></p>" +
+                    "<p class='offset-1 mb-0'>Balance: <span style='font-weight: bold' id='balance'></span></p>" +
+                    "<p class='offset-1 mb-0'>Ropsten Block Number: <span style='font-weight: bold' id='blockNumber'></span></p>" +
+                    "<p class='mt-3 mb-3'>Getting addresses and basic information happens seamlessly, however some actions that require user confirmation are secured by the SDK itself and require manual approval. (Check out <a target='_blank' href='http://faucet.ropsten.be:3001/'>this Ropsten Faucet</a> if you need some testnet ETH)</p>" +
+                    "<div class='mt-3 mb-3'>" +
+                        "<button class='col-4 col-sm-3 btn btn--primary' type='submit' id='sendTx' onclick='sendTx()'>Send 0.001 ETH</button>" +
+                        "<button class='col-4 col-sm-3 btn btn--primary' type='submit' id='signMsg' onclick='signMsg()'>Sign Message</button>" +
+                    "</div>" +
+                    "<div class='offset-1 col-10' style='font-family: monospace; font-size: 14px; word-break: break-all;'>" +
+                        "<p id='methodResult'></p>"
+                    "</div>"
+                    ;
+
+                document.getElementById('status').innerHTML = 'Connected';
+                document.getElementById('status').style.color = "green";
+                document.getElementById('address').innerHTML = address + ' (<a target="_blank" href="https://ropsten.etherscan.io/address/' + address + '">View on Etherscan</a>)';
+
+                window.setInterval(function () {
+                    document.getElementById('balance').innerHTML = balance;
+                    document.getElementById('blockNumber').innerHTML = blockNumber;
+                    getBalance();
+                    getBlockNumber()
+                }, 500);
+            }
+
+            var elphRegister = function() {
+                document.getElementById('elphRegister').innerHTML = "Connecting...";
+                web3 = new Web3(new window.Elph.ElphProvider({network: "ropsten"}));
+
+                web3.eth.getAccounts(function(error, accounts){
+                    if (error) {
+                        console.error(error);
+                        return;
+                    }
+
+                    address = accounts[0];
+                    updateFrame();
+                });
+            }
+        </script>
+
+        <div id='nav-bar' class="nav-container">
+            <nav id="menu1" class="bar bar-1" data-scroll-class="100px:pos-fixed">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-2 col-md-2">
+                            <div class="bar__module">
+                            <img class='logo logo-dark' alt='Logo' src='logo.png' />
+                            <img class='logo logo-light' alt='Logo' src='logo.png' />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <div class='container'>
+            <div class='mt-5 mb-5'>
+                <h1 class='mb-2'>Elph SDK Demo</h1>
+                <p>Welcome to the Elph SDK Demo, the easiet way to integrate Web3 into your dApp and have users online instantly without anything to download.  We'll walk you through step by step on what the experience will be like for an average dApp.  This demo is running on the Ropsten Testnet so feel free to play around all you want!</p>
+            </div>
+
+            <p>Ropsten Testnet Connection Status: <span style="font-weight: bold; color: red" id="status">Disconnected</span></p>
+
+            <div id="frame">
+                <p class='mb-0'>Doesn't look like you're connected to the Ethereum network using the Elph Provider. Not a problem, register below to see how easy it is to get started with Web3.</p>
+                <div class='mt-3 mb-3'>
+                    <button class="col-4 col-sm-3 btn btn--primary" type="submit" id="elphRegister" onclick='elphRegister()'>Connect with Elph</button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

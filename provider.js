@@ -43,6 +43,8 @@ function ElphProvider(options={'network' : 'mainnet'}) {
     this.account = undefined;
     this.net_version = undefined;
     this.initializeListener();
+    this.handleRegistration();
+
 
     getIframeVersion().then(iframeVersion => {
         this.initializeIframe(iframeVersion);
@@ -51,6 +53,11 @@ function ElphProvider(options={'network' : 'mainnet'}) {
     .catch(err => {
         console.error(err);
     });
+}
+ElphProvider.prototype.handleRegistration = function() {
+    if (!localStorage.getItem('elphAuthenticated')) {
+        window.open(ELPH_ORIGIN + '/register','register','resizable,height=650,width=850,left=400,top=200');
+    }
 }
 ElphProvider.prototype.serializeOptions = function() {
     var that = this;
@@ -119,10 +126,6 @@ ElphProvider.prototype.initializeModalFrame = function (iframeVersion) {
     document.body.appendChild(this.modalIframe);   
 };
 ElphProvider.prototype.initializeIframe = function (iframeVersion) {
-    if (!localStorage.getItem('elphAuthenticated')) {
-        window.open(ELPH_ORIGIN + '/register','register','resizable,height=650,width=850');
-    }
-
     if (document.getElementById('web3Iframe')) {
         return true;
     }

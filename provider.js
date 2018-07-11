@@ -1,15 +1,12 @@
 var PROVIDER_VERSION = 'v1.0.0';
-var ELPH_ORIGIN = 'http://127.0.0.1:9000';
-// TODO(vamsi): switch this back to https://sdk.elph.com,
-// as well as remove all occurences of '/sdk.elph.com' elsewhere
-// in the file.
-var SDK_ELPH_ORIGIN = 'https://s3.amazonaws.com'
+var ELPH_ORIGIN = 'https://elph.com';
+var SDK_ELPH_ORIGIN = 'https://sdk.elph.com'
 
 function getIframeVersion() {
     // Note: we set <AllowedHeader>*</AllowedHeader> in the <CORSRule> of
     // the S3 bucket for this GET to work (w.r.t. cross-origin policy).
     return new Promise((resolve, reject) => {
-        fetch(SDK_ELPH_ORIGIN + '/sdk.elph.com/iframes/version.json')
+        fetch(SDK_ELPH_ORIGIN + '/iframes/version.json')
         .then(function(response) {
             return response.json();
         })
@@ -112,7 +109,7 @@ ElphProvider.prototype.initializeModalFrame = function (iframeVersion) {
     }  
    
     this.modalIframe = document.createElement('iframe');   
-    this.modalIframe.src = SDK_ELPH_ORIGIN + '/sdk.elph.com' + '/iframes/' + iframeVersion + '/modal.html?' + Date.now().toString()
+    this.modalIframe.src = SDK_ELPH_ORIGIN + '/iframes/' + iframeVersion + '/modal.html?' + Date.now().toString()
     this.modalIframe.style.position = "absolute";  
     this.modalIframe.style.border = 0; 
     this.modalIframe.style.top = 0;    
@@ -131,7 +128,7 @@ ElphProvider.prototype.initializeIframe = function (iframeVersion) {
     }
 
     this.iframe = document.createElement('iframe');
-    this.iframe.src = SDK_ELPH_ORIGIN + '/sdk.elph.com' + '/iframes/' + iframeVersion + '/web3.html?' + Date.now().toString()
+    this.iframe.src = SDK_ELPH_ORIGIN + '/iframes/' + iframeVersion + '/web3.html?' + Date.now().toString()
     this.iframe.style.border = 0;
     this.iframe.style.position = "absolute";
     this.iframe.style.width = 0;

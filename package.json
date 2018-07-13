@@ -1,13 +1,36 @@
 {
   "name": "elph",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Elph's javascript client side SDK",
   "main": "provider.js",
   "browser": "dist/bundle.js",
   "scripts": {
+    "build": "node tools/build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Tanooj Luthra <tanooj@elph.com> (https://elph.com)",
-  "license": "ISC",
-  "devDependencies": {}
+  "license": "MIT",
+  "babel": {
+    "presets": [
+      "latest",
+      "stage-0"
+    ],
+    "plugins": [
+      "transform-runtime"
+    ]
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "pascal-case": "^2.0.1",
+    "babel-cli": "^6.16.0",
+    "babel-core": "^6.17.0",
+    "babel-eslint": "^7.0.0",
+    "babel-plugin-transform-runtime": "^6.15.0",
+    "babel-preset-latest": "^6.16.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "babel-register": "^6.16.3",
+    "del": "^2.2.2",
+    "rollup": "^0.36.3",
+    "rollup-plugin-babel": "^2.6.1"
+  }
 }

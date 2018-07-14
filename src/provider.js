@@ -76,9 +76,7 @@ class ElphProvider {
         window.addEventListener('message', function(e) {
             // TODO: add event origin check here.
             if (e.origin === SDK_ELPH_ORIGIN) {
-                console.log("Received message: ", e);
                 if (e.data.type === "GET_OPTIONS") {
-                    console.log("GET_OPTIONS", that.iframe);
                     that.iframe.contentWindow.postMessage({ type: "SET_OPTIONS", payload: that.options }, SDK_ELPH_ORIGIN);
                 } else if (e.data.type === "AUTHENTICATED") {
                     that.authenticated = true;
@@ -98,13 +96,11 @@ class ElphProvider {
                         that.subscriptions[i](e.data.result);
                     }
                 } else if (e.data.type === "SHOW_MODAL_IFRAME") {
-                    console.log("Should have opened modal iframe", that.modalIframe);
                     that.modalIframe.style.display = 'block';
                 } else if (e.data.type === "HIDE_MODAL_IFRAME") {
-                    console.log("Should have closed modal iframe", that.modalIframe);
                     that.modalIframe.style.display = 'none';
                 } else {
-                    console.log("got an unknown response back: ", e.data.type);
+                    // console.log("got an unknown response back: ", e.data.type);
                 }
             }
         });
@@ -156,7 +152,6 @@ class ElphProvider {
         var result;
         switch(method) {
             case "eth_accounts":
-                console.log("eth_accounts sync");
                 result = this.account ? [this.account] : []
                 break;
             case "eth_coinbase":
@@ -184,12 +179,10 @@ class ElphProvider {
     sendMessage(payload) {
         var that = this;
         if (!this.authenticated) {
-            // console.log("Web3 not authenticated yet...");
             window.setTimeout(function () {
                 that.sendMessage(payload)
             }, 1000);
         } else {
-            console.log("Sending payload: ", payload);
             this.iframe.contentWindow.postMessage(payload, SDK_ELPH_ORIGIN);
         }
     }

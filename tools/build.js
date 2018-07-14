@@ -12,7 +12,7 @@ let promise = Promise.resolve();
 promise = promise.then(() => del(['dist/*']));
 
 // Compile source code into a distributable format with Babel
-['es', 'cjs', 'umd'].forEach((format) => {
+['es', 'cjs', 'umd', 'iife'].forEach((format) => {
   promise = promise.then(() => rollup.rollup({
     entry: 'src/index.js',
     external: Object.keys(pkg.dependencies),
@@ -26,7 +26,7 @@ promise = promise.then(() => del(['dist/*']));
     dest: `dist/${format === 'cjs' ? 'index' : `index.${format}`}.js`,
     format,
     sourceMap: true,
-    moduleName: format === 'umd' ? pkg.name : undefined,
+    moduleName: format === 'umd' || format === 'iife' ? pkg.name : undefined,
   })));
 });
 

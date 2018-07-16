@@ -34,6 +34,8 @@ function getIframeVersion() {
 class ElphProvider {
     constructor(options={'network' : 'mainnet'}) {
         this.options = options;
+        this.options['elphAuthenticated'] = localStorage.getItem('elphAuthenticated')
+
         this.authenticated = false;
         this.requests = {};
         this.subscriptions = [];

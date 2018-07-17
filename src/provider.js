@@ -43,6 +43,7 @@ class ElphProvider {
         this.account = undefined;
         this.net_version = undefined;
         this.isElph = true;
+        this.requestQueue = [];
 
         this.initializeListener();
         this.handleRegistration();
@@ -86,6 +87,7 @@ class ElphProvider {
                     that.account = e.data.account;
                     that.net_version = e.data.net_version;
                     localStorage.setItem('elphAuthenticated', true);
+                    that.popRequestFromQueue();
                 } else if (e.data.type === "RESULT") {
                     var callback = that.requests[e.data.payload.id].callback;
                     if (e.data.error) {
@@ -145,9 +147,25 @@ class ElphProvider {
         document.body.appendChild(this.iframe);
     }
 
+    addRequestToQueue(payload, callback) {
+        this.requestQueue.push({ payload: payload, callback: callback });
+        if (this.authenticated) this.popRequestFromQueue();
+    }
+
+    popRequestFromQueue() {
+        if (this.requestQueue.length === 0) return;
+        var request = this.requestQueue.shift();
+        if (request) {
+            var {payload, callback} = request;
+            this.requests[payload.id] = { payload: payload, callback: callback };
+            this.iframe.contentWindow.postMessage(
+                { type: "REQUEST", payload: payload }, SDK_ELPH_ORIGIN);
+            this.popRequestFromQueue();
+        }
+    }
+
     sendAsync(payload, callback) {
-        this.requests[payload.id] = { payload: payload, callback: callback };
-        this.sendMessage({ type: "REQUEST", payload: payload });
+        this.addRequestToQueue(payload, callback);
     }
 
     send(payload) {
@@ -177,17 +195,6 @@ class ElphProvider {
             jsonrpc: payload.jsonrpc,
             result: result
         };
-    }
-
-    sendMessage(payload) {
-        var that = this;
-        if (!this.authenticated) {
-            window.setTimeout(function () {
-                that.sendMessage(payload)
-            }, 1000);
-        } else {
-            this.iframe.contentWindow.postMessage(payload, SDK_ELPH_ORIGIN);
-        }
     }
 }
 

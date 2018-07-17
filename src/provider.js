@@ -1,4 +1,3 @@
-const PROVIDER_VERSION = 'v1.0.5';
 const IFRAME_VERSION = 'v1.0.0';
 const IS_DEV = false; // Currently just used for local development of the SDK itself.
 const ELPH_ORIGIN = (IS_DEV ? 'http://localhost:8000' : 'https://elph.com');

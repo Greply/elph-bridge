@@ -1,7 +1,7 @@
 # [Elph](https://elph.com)
 
 
-Elph, the new standard for decentralized apps.
+Elph, the new platform for decentralized apps.
 
 ## How does it work?
 
@@ -38,7 +38,7 @@ $ npm install elph
 You can also include the bundled Elph.js file hosted on jsdelivr's CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/elph/dist/bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/elph/index.iife.js"></script>
 ```
 
 <hr>

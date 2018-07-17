@@ -37,6 +37,7 @@ class ElphProvider {
         this.options = options;
         this.options['elphAuthenticated'] = localStorage.getItem('elphAuthenticated')
 
+        this.registerWindowOpen = true;
         this.authenticated = false;
         this.requests = {};
         this.subscriptions = [];
@@ -45,9 +46,9 @@ class ElphProvider {
         this.isElph = true;
         this.requestQueue = [];
 
+        this.resetState();
         this.initializeListener();
         this.handleRegistration();
-
 
         getIframeVersion().then(iframeVersion => {
             this.initializeIframe(iframeVersion);
@@ -58,9 +59,31 @@ class ElphProvider {
         });
     }
 
+    resetState() {
+        let oldModalIframe = document.getElementById('modalIframe');
+        if (oldModalIframe) {
+            oldModalIframe.parentNode.removeChild(oldModalIframe);
+        }
+        let oldWeb3Iframe = document.getElementById('web3Iframe');
+        if (oldWeb3Iframe) {
+            oldWeb3Iframe.parentNode.removeChild(oldWeb3Iframe);
+        }
+    }
+
     handleRegistration() {
         if (!localStorage.getItem('elphAuthenticated')) {
-            window.open(ELPH_ORIGIN + '/register','register','resizable,height=650,width=850,left=400,top=200');
+            this.registerWindow = window.open(ELPH_ORIGIN + '/register','register','resizable,height=650,width=850,left=400,top=200');
+
+            var that = this;
+            this.registerWindowPoll = setInterval(function() {
+                if (that.registerWindow.closed) {
+                    that.registerWindowOpen = false;
+                    if (!that.authenticated) {
+                        that.popRequestFromQueue();
+                    }
+                    clearInterval(that.registerWindowPoll);
+                }
+            }, 1000);
         }
     }
 
@@ -75,10 +98,20 @@ class ElphProvider {
         this.subscriptions.push(callback);
     }
 
+    runCallback(id, error, result) {
+        var callback = this.requests[id].callback;
+        if (error) {
+            callback(error, null);
+        } else {
+            callback(null, result);
+        }
+        delete this.requests[id];
+    }
+
     initializeListener() {
         var that = this;
         window.addEventListener('message', function(e) {
-            // TODO: add event origin check here.
+            if (!that.iframe.contentWindow) return;
             if (e.origin === SDK_ELPH_ORIGIN) {
                 if (e.data.type === "GET_OPTIONS") {
                     that.iframe.contentWindow.postMessage({ type: "SET_OPTIONS", payload: that.options }, SDK_ELPH_ORIGIN);
@@ -87,15 +120,11 @@ class ElphProvider {
                     that.account = e.data.account;
                     that.net_version = e.data.net_version;
                     localStorage.setItem('elphAuthenticated', true);
+                    that.registerWindowOpen = false;
+                    if (that.registerWindow) that.registerWindow.close();
                     that.popRequestFromQueue();
                 } else if (e.data.type === "RESULT") {
-                    var callback = that.requests[e.data.payload.id].callback;
-                    if (e.data.error) {
-                        callback(e.data.error, null);                    
-                    } else {
-                        callback(null, e.data.result);
-                    }
-                    delete that.requests[e.data.payload.id];
+                    that.runCallback(e.data.payload.id, e.data.error, e.data.result);
                 } else if (e.data.type === "SUBSCRIPTION_RESULT") {
                     for (var i = 0; i < that.subscriptions.length; i++) {
                         that.subscriptions[i](e.data.result);
@@ -112,10 +141,6 @@ class ElphProvider {
     }
 
     initializeModalFrame(iframeVersion) {
-        if (document.getElementById('modalIframe')) {  
-            return true;   
-        }  
-       
         this.modalIframe = document.createElement('iframe');   
         this.modalIframe.src = SDK_ELPH_ORIGIN + '/iframes/' + iframeVersion + '/modal.html?' + Date.now().toString()
         this.modalIframe.style.position = "absolute";  
@@ -127,15 +152,11 @@ class ElphProvider {
         this.modalIframe.style.display = 'none';   
         this.modalIframe.style.zIndex = '10000000';    
         this.modalIframe.allowTransparency="true"; 
-        this.modalIframe.id = "modalIframe";   
+        this.modalIframe.id = "modalIframe";
         document.body.appendChild(this.modalIframe);   
     }
 
     initializeIframe(iframeVersion) {
-        if (document.getElementById('web3Iframe')) {
-            return true;
-        }
-
         this.iframe = document.createElement('iframe');
         this.iframe.src = SDK_ELPH_ORIGIN + '/iframes/' + iframeVersion + '/web3.html?' + Date.now().toString()
         this.iframe.style.border = 0;
@@ -149,7 +170,10 @@ class ElphProvider {
 
     addRequestToQueue(payload, callback) {
         this.requestQueue.push({ payload: payload, callback: callback });
-        if (this.authenticated) this.popRequestFromQueue();
+        this.requests[payload.id] = { payload: payload, callback: callback };
+        if (!this.registerWindowOpen) {
+            this.popRequestFromQueue();
+        }
     }
 
     popRequestFromQueue() {
@@ -157,7 +181,12 @@ class ElphProvider {
         var request = this.requestQueue.shift();
         if (request) {
             var {payload, callback} = request;
-            this.requests[payload.id] = { payload: payload, callback: callback };
+
+            if (!this.authenticated) {
+                this.runCallback(payload.id, 'User cancelled auth.', null);
+                return;
+            }
+
             this.iframe.contentWindow.postMessage(
                 { type: "REQUEST", payload: payload }, SDK_ELPH_ORIGIN);
             this.popRequestFromQueue();

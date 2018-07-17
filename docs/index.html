@@ -5,7 +5,7 @@
             const isDev = (location.hostname === 'localhost');
             const ELPH_PROVIDER_SRC = (isDev
                 ? "http://127.0.0.1:8888/dist/index.js"
-                : "https://cdn.jsdelivr.net/npm/elph/dist/bundle.js");
+                : "https://cdn.jsdelivr.net/npm/elph/index.iife.js");
 
             var script = document.createElement('script');
             script.type = 'text/javascript';

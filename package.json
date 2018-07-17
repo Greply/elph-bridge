@@ -1,6 +1,6 @@
 {
   "name": "elph",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Elph's javascript client side SDK",
   "main": "provider.js",
   "browser": "dist/bundle.js",

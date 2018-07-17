@@ -36,6 +36,7 @@ class ElphProvider {
     constructor(options={'network' : 'mainnet'}) {
         this.options = options;
         this.options['elphAuthenticated'] = localStorage.getItem('elphAuthenticated')
+        this.options['title'] = document.title;
 
         this.registerWindowOpen = true;
         this.authenticated = false;

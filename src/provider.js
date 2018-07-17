@@ -1,6 +1,7 @@
-var PROVIDER_VERSION = 'v1.0.0';
-var ELPH_ORIGIN = 'https://elph.com';
-var SDK_ELPH_ORIGIN = 'https://sdk.elph.com'
+const PROVIDER_VERSION = 'v1.0.2';
+const IS_DEV = (location.hostname === 'localhost');
+const ELPH_ORIGIN = (IS_DEV ? 'http://localhost:8000' : 'https://elph.com');
+const SDK_ELPH_ORIGIN = (IS_DEV ? 'http://localhost:9000' : 'https://sdk.elph.com');
 
 function getIframeVersion() {
     // Note: we set <AllowedHeader>*</AllowedHeader> in the <CORSRule> of

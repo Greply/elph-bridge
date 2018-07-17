@@ -1,1 +1,1 @@
-export ElphProvider  from "./provider"
+export { default as ElphProvider } from "./provider"

@@ -1,36 +1,8 @@
-const PROVIDER_VERSION = 'v1.0.4';
+const PROVIDER_VERSION = 'v1.0.5';
+const IFRAME_VERSION = 'v1.0.0';
 const IS_DEV = false; // Currently just used for local development of the SDK itself.
 const ELPH_ORIGIN = (IS_DEV ? 'http://localhost:8000' : 'https://elph.com');
 const SDK_ELPH_ORIGIN = (IS_DEV ? 'http://localhost:9000' : 'https://sdk.elph.com');
-
-function getIframeVersion() {
-    // Note: we set <AllowedHeader>*</AllowedHeader> in the <CORSRule> of
-    // the S3 bucket for this GET to work (w.r.t. cross-origin policy).
-    return new Promise((resolve, reject) => {
-        fetch(SDK_ELPH_ORIGIN + '/iframes/version.json')
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(json) {
-            if (PROVIDER_VERSION in json) {
-                let iframeVersionsList = json[PROVIDER_VERSION];
-                if (iframeVersionsList.length === 0) {
-                    reject('The iframe version list corresponding ' +
-                           'to PROVIDER_VERSION: ' +
-                           PROVIDER_VERSION + ' is empty.');
-                    return;
-                }
-                resolve(iframeVersionsList[iframeVersionsList.length - 1]);
-            } else {
-                reject("Invalid PROVIDER_VERSION specified: " + PROVIDER_VERSION);
-                return;
-            }
-        })
-        .catch(function(error) {
-            reject('Unable to fetch IFRAME_VERSION from S3: ' + error);
-        })
-    });
-}
 
 class ElphProvider {
     constructor(options={'network' : 'mainnet'}) {
@@ -51,13 +23,8 @@ class ElphProvider {
         this.initializeListener();
         this.handleRegistration();
 
-        getIframeVersion().then(iframeVersion => {
-            this.initializeIframe(iframeVersion);
-            this.initializeModalFrame(iframeVersion);
-        })
-        .catch(err => {
-            console.error(err);
-        });
+        this.initializeIframe(IFRAME_VERSION);
+        this.initializeModalFrame(IFRAME_VERSION);
     }
 
     resetState() {

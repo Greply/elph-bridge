@@ -9,21 +9,49 @@ class ElphProvider {
         this.options['elphAuthenticated'] = localStorage.getItem('elphAuthenticated')
         this.options['title'] = document.title;
 
+        this.isElph = true;
+        
+        this.initializeState();
+        this.resetState();
+        this.initializeListener();
+
+        this.attemptReconnect();
+    }
+
+    isConnected() {
+        return this.authenticated;
+    }
+
+    hasPreviouslyConnected() {
+        return localStorage.getItem('elphAuthenticated') === "true";
+    }
+
+    disconnect() {
+        this.resetState();
+        localStorage.removeItem('elphAuthenticated');
+        this.initializeState();
+    }
+
+    attemptReconnect() {
+        if (this.hasPreviouslyConnected()) {
+            this.connect();            
+        }
+    }
+
+    connect() {
+        this.handleRegistration();
+        this.initializeIframe(IFRAME_VERSION);
+        this.initializeModalFrame(IFRAME_VERSION);
+    }
+
+    initializeState() {
         this.registerWindowOpen = true;
         this.authenticated = false;
         this.requests = {};
         this.subscriptions = [];
         this.account = undefined;
         this.net_version = undefined;
-        this.isElph = true;
         this.requestQueue = [];
-
-        this.resetState();
-        this.initializeListener();
-        this.handleRegistration();
-
-        this.initializeIframe(IFRAME_VERSION);
-        this.initializeModalFrame(IFRAME_VERSION);
     }
 
     resetState() {
@@ -38,7 +66,7 @@ class ElphProvider {
     }
 
     handleRegistration() {
-        if (!localStorage.getItem('elphAuthenticated')) {
+        if (!this.hasPreviouslyConnected()) {
             this.registerWindow = window.open(ELPH_ORIGIN + '/register','register','resizable,height=650,width=850,left=400,top=200');
 
             var that = this;

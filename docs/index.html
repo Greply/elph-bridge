@@ -16,8 +16,42 @@
         <link rel="stylesheet" type="text/css" href="application.css">
     </head>
     <body>
+
+        <div id='nav-bar' class="nav-container">
+            <nav id="menu1" class="bar bar-1" data-scroll-class="100px:pos-fixed">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-2 col-md-2">
+                            <div class="bar__module">
+                            <img class='logo logo-dark' alt='Logo' src='logo.png' />
+                            <img class='logo logo-light' alt='Logo' src='logo.png' />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <div class='container'>
+            <div class='mt-5 mb-5'>
+                <h1 class='mb-2'>Elph SDK Demo</h1>
+                <p>Welcome to the Elph SDK Demo, the easiest way to integrate Web3 into your dApp and have users online instantly without anything to download.  We'll walk you step-by-step through what the experience can be for a typical dApp.  This demo is running on the Ropsten Testnet so feel free to play around all you want!</p>
+                <p>If you're interested in using our SDK, have questions, or just want to say 👋, email us at <a href="mailto:hello@elph.com">hello@elph.com</a> and drop by our <a href="http://t.me/elphnetwork">Telegram</a>.</p>
+            </div>
+
+            <p>Ropsten Testnet Connection Status: <span style="font-weight: bold; color: red" id="status">Disconnected</span></p>
+
+            <div id="frame">
+                <p class='mb-0'>Doesn't look like you're connected to the Ethereum network using the Elph Provider. Not a problem, register below to see how easy it is to get started with Web3.</p>
+                <div class='mt-3 mb-3'>
+                    <p id="login-status" style="display: none">Found previous login session, autoconnecting...</p>
+                    <button class="col-4 col-sm-3 btn btn--primary" type="submit" id="elphRegister" onclick='elphRegister()'>Connect with Elph</button>
+                </div>
+            </div>
+        </div>
+
         <script type="text/javascript">
-            var web3;
+            var web3 = new Web3(new window.Elph.ElphProvider({network: "ropsten"}));;
             var address;
             var balance = "...";
             var blockNumber = "...";
@@ -54,6 +88,11 @@
                 });
             }
 
+            var logout = function() {
+                web3.currentProvider.disconnect();
+                location.reload();
+            }
+
             var updateFrame = function() {
                 document.getElementById('frame').innerHTML = "" +
                     "<p class='mb-3'>Congrats! Just like that you're connected to the Ropsten Ethereum Network.  Let's take a look at your address, balance and the latest block number on the network. It's constantly listening to new updates and is <strong>live updating!</strong></p>" +
@@ -64,6 +103,7 @@
                     "<div class='mt-3 mb-3'>" +
                         "<button class='col-4 col-sm-3 btn btn--primary' type='submit' id='sendTx' onclick='sendTx()'>Send 0.001 ETH</button>" +
                         "<button class='col-4 col-sm-3 btn btn--primary' type='submit' id='signMsg' onclick='signMsg()'>Sign Message</button>" +
+                        "<button class='col-4 col-sm-3 btn btn--primary' type='submit' id='logout' onclick='logout()'>Logout</button>" +
                     "</div>" +
                     "<div class='offset-1 col-10' style='font-family: monospace; font-size: 14px; word-break: break-all;'>" +
                         "<p id='methodResult'></p>"
@@ -84,8 +124,13 @@
 
             var elphRegister = function() {
                 document.getElementById('elphRegister').innerHTML = "Connecting...";
-                web3 = new Web3(new window.Elph.ElphProvider({network: "ropsten"}));
+                document.getElementById('elphRegister').disabled = true
+                web3.currentProvider.connect();
 
+                getAccountInformation();
+            }
+
+            var getAccountInformation = function() {
                 web3.eth.getAccounts(function(error, accounts){
                     if (error) {
                         console.error(error);
@@ -96,38 +141,13 @@
                     updateFrame();
                 });
             }
+
+            if (web3.currentProvider.hasPreviouslyConnected()) {
+                document.getElementById('elphRegister').innerHTML = "Autoconnecting...";
+                document.getElementById('elphRegister').disabled = true
+                document.getElementById('login-status').style.display = 'block';
+                getAccountInformation();
+            }
         </script>
-
-        <div id='nav-bar' class="nav-container">
-            <nav id="menu1" class="bar bar-1" data-scroll-class="100px:pos-fixed">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-2 col-md-2">
-                            <div class="bar__module">
-                            <img class='logo logo-dark' alt='Logo' src='logo.png' />
-                            <img class='logo logo-light' alt='Logo' src='logo.png' />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-        </div>
-
-        <div class='container'>
-            <div class='mt-5 mb-5'>
-                <h1 class='mb-2'>Elph SDK Demo</h1>
-                <p>Welcome to the Elph SDK Demo, the easiest way to integrate Web3 into your dApp and have users online instantly without anything to download.  We'll walk you step-by-step through what the experience can be for a typical dApp.  This demo is running on the Ropsten Testnet so feel free to play around all you want!</p>
-                <p>If you're interested in using our SDK, have questions, or just want to say 👋, email us at <a href="mailto:hello@elph.com">hello@elph.com</a> and drop by our <a href="http://t.me/elphnetwork">Telegram</a>.</p>
-            </div>
-
-            <p>Ropsten Testnet Connection Status: <span style="font-weight: bold; color: red" id="status">Disconnected</span></p>
-
-            <div id="frame">
-                <p class='mb-0'>Doesn't look like you're connected to the Ethereum network using the Elph Provider. Not a problem, register below to see how easy it is to get started with Web3.</p>
-                <div class='mt-3 mb-3'>
-                    <button class="col-4 col-sm-3 btn btn--primary" type="submit" id="elphRegister" onclick='elphRegister()'>Connect with Elph</button>
-                </div>
-            </div>
-        </div>
     </body>
 </html>

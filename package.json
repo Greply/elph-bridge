@@ -2,11 +2,10 @@
   "name": "elph",
   "version": "1.0.8",
   "description": "Elph's javascript client side SDK",
-  "main": "provider.js",
-  "browser": "dist/bundle.js",
   "scripts": {
     "build": "node tools/build && npm run build:iife",
     "build:iife": "rollup src/index.js -o ./dist/index.iife.js --format iife --name 'Elph'",
+    "watch": "node tools/watcher",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Tanooj Luthra <tanooj@elph.com> (https://elph.com)",

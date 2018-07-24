@@ -1,6 +1,6 @@
 {
   "name": "elph",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "Elph's javascript client side SDK",
   "scripts": {
     "build": "node tools/build && npm run build:iife",

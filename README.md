@@ -64,14 +64,31 @@ var ElphProvider = window.Elph.ElphProvider;
 
 <hr>
 
-## Initialization
+## Usage
 
 Once Elph has been included, you can simply initialize web3 as you would with Mist or Metamask
 ```js
-web3 = new Web3(new ElphProvider())
+web3 = new Web3(new ElphProvider());
 ```
 
-This will automatically prompt the user to register or login to Elph, and immediately allow a user to access your dApp.
+This will check if a previous session was available, and automatically connect with that.  If no previous session was found, you will need to connect and prompt the user to login/register with their Elph account.  A typical flow would look like this:
+```js
+web3 = new Web3(new ElphProvider());
+
+if (!web3.currentProvider.isConnected()) {
+    // Here we know no session was found, and we want to explicitly open the registration window.
+    web3.currentProvider.connect();
+}
+```
+
+Other potentially helpful lifecycle methods include
+```js
+web3.currentProvider.isConnected() // True or False if a user is currently connected to the network via Elph.
+
+web3.currentProvider.disconnect() // Allows a user the option of 'logging-out' from Elph on your website
+
+web3.currentProvider.isElph // True if ElphProvider is your current provider, otherwise 'undefined'
+```
 
 <hr>
 
@@ -80,7 +97,7 @@ This will automatically prompt the user to register or login to Elph, and immedi
 A configuration options object can be passed along when initializing the Elph provider:
 
 ```js
-web3js = new Web3(new Elph.ElphProvider({
+web3 = new Web3(new Elph.ElphProvider({
  network: 'ropsten'
 }));
 ```

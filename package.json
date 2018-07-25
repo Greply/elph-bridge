@@ -2,6 +2,9 @@
   "name": "elph",
   "version": "1.0.10",
   "description": "Elph's javascript client side SDK",
+  "main": "index.umd.js",
+  "module": "index.umd.js",
+  "browser": "index.umd.js",
   "scripts": {
     "build": "node tools/build && npm run build:iife",
     "build:iife": "rollup src/index.js -o ./dist/index.iife.js --format iife --name 'Elph'",

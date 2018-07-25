@@ -4,4 +4,5 @@ sdk-auto-build-setup: npm run watch
 
 jsdeliver: python -m SimpleHTTPServer 8888
 
-elph-com: cd ../web/ && foreman start -p 8000
+web: cd ../web/ && bundle exec rails s -p 8000
+webpacker: cd ../web/ && ./bin/webpack-dev-server

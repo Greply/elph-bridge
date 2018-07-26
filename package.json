@@ -1,39 +1,23 @@
 {
   "name": "elph",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Elph's javascript client side SDK",
   "main": "index.umd.js",
   "module": "index.umd.js",
   "browser": "index.umd.js",
   "scripts": {
-    "build": "node tools/build && npm run build:iife",
+    "clean": "rm -rf ./dist",
+    "build": "node tools/build",
     "build:iife": "rollup src/index.js -o ./dist/index.iife.js --format iife --name 'Elph'",
     "watch": "node tools/watcher",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Tanooj Luthra <tanooj@elph.com> (https://elph.com)",
   "license": "MIT",
-  "babel": {
-    "presets": [
-      "latest",
-      "stage-0"
-    ],
-    "plugins": [
-      "transform-runtime"
-    ]
-  },
   "dependencies": {},
   "devDependencies": {
-    "babel-cli": "^6.16.0",
-    "babel-core": "^6.17.0",
-    "babel-eslint": "^7.0.0",
-    "babel-plugin-transform-runtime": "^6.15.0",
-    "babel-preset-latest": "^6.16.0",
-    "babel-preset-stage-0": "^6.16.0",
-    "babel-register": "^6.16.3",
     "del": "^2.2.2",
     "pascal-case": "^2.0.1",
-    "rollup": "^0.36.3",
-    "rollup-plugin-babel": "^2.6.1"
+    "rollup": "^0.36.3"
   }
 }

@@ -3,14 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const spawn = require('child_process').spawn;
 
-
-// Enable this flag to only build index.iife.js, for faster SDK development.
-// TODO(Sarat): Optimize the build for development so we don't need this flag anymore.
-const BUILD_ONLY_IIFE = false;
-
-
 var pendingBuild = false;
-
 
 
 function runBuild() {
@@ -20,9 +13,6 @@ function runBuild() {
 
     console.log('Building...');
     let command = 'npm run build';
-    if (BUILD_ONLY_IIFE) {
-        command += ':iife'
-    }
 
     pendingBuild = true;
     let testProcess = spawn(command, {stdio: 'inherit', shell: true});

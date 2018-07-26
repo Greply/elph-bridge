@@ -25,19 +25,17 @@ class ElphProvider {
 
     initializeOptions(options) {
         this.options = options;
-        this.options['elphAuthenticated'] = localStorage.getItem('elphAuthenticated')
+        this.options['elphAuthenticated'] = localStorage.getItem('elphAuthenticated');
         this.options['title'] = document.title;
     }
 
     initializeState() {
         this.isElph = true;
-        this.registerWindowOpen = true;
         this.authenticated = false;
         this.requests = {};
         this.subscriptions = [];
         this.account = undefined;
         this.net_version = undefined;
-        this.requestQueue = [];
     }
 
     initializeListener() {
@@ -52,9 +50,6 @@ class ElphProvider {
                     that.account = e.data.account;
                     that.net_version = e.data.net_version;
                     localStorage.setItem('elphAuthenticated', true);
-                    that.registerWindowOpen = false;
-                    if (that.registerWindow) that.registerWindow.close();
-                    that.popRequestFromQueue();
                 } else if (e.data.type === "RESULT") {
                     that.runCallback(e.data.payload.id, e.data.error, e.data.result);
                 } else if (e.data.type === "SUBSCRIPTION_RESULT") {
@@ -100,24 +95,13 @@ class ElphProvider {
 
     handleRegistration() {
         if (!this.hasPreviouslyAuthenticated()) {
-            this.registerWindow = window.open(ELPH_ORIGIN + '/register','register','resizable,height=650,width=850,left=400,top=200');
-
-            var that = this;
-            this.registerWindowPoll = setInterval(function() {
-                if (that.registerWindow.closed) {
-                    that.registerWindowOpen = false;
-                    if (!that.authenticated) {
-                        that.popRequestFromQueue();
-                    }
-                    clearInterval(that.registerWindowPoll);
-                }
-            }, 1000);
+            window.open(ELPH_ORIGIN + '/register','register','resizable,height=650,width=850,left=400,top=200');
         }
     }
 
     initializeIframe() {
         this.iframe = document.createElement('iframe');
-        this.iframe.src = SDK_ELPH_ORIGIN + '/iframes/' + IFRAME_VERSION + '/web3.html?' + Date.now().toString()
+        this.iframe.src = SDK_ELPH_ORIGIN + '/iframes/' + IFRAME_VERSION + '/web3.html?' + Date.now().toString();
         this.iframe.style.border = 0;
         this.iframe.style.position = "absolute";
         this.iframe.style.width = 0;
@@ -129,7 +113,7 @@ class ElphProvider {
 
     initializeModalFrame() {
         this.modalIframe = document.createElement('iframe');   
-        this.modalIframe.src = SDK_ELPH_ORIGIN + '/iframes/' + IFRAME_VERSION + '/modal.html?' + Date.now().toString()
+        this.modalIframe.src = SDK_ELPH_ORIGIN + '/iframes/' + IFRAME_VERSION + '/modal.html?' + Date.now().toString();
         this.modalIframe.style.position = "absolute";  
         this.modalIframe.style.border = 0; 
         this.modalIframe.style.top = 0;    
@@ -141,31 +125,6 @@ class ElphProvider {
         this.modalIframe.allowTransparency="true"; 
         this.modalIframe.id = "modalIframe";
         document.body.appendChild(this.modalIframe);   
-    }
-
-    addRequestToQueue(payload, callback) {
-        this.requestQueue.push({ payload: payload, callback: callback });
-        this.requests[payload.id] = { payload: payload, callback: callback };
-        if (!this.registerWindowOpen) {
-            this.popRequestFromQueue();
-        }
-    }
-
-    popRequestFromQueue() {
-        if (this.requestQueue.length === 0) return;
-        var request = this.requestQueue.shift();
-        if (request) {
-            var {payload, callback} = request;
-
-            if (!this.authenticated) {
-                this.runCallback(payload.id, 'User cancelled auth.', null);
-                return;
-            }
-
-            this.iframe.contentWindow.postMessage(
-                { type: "REQUEST", payload: payload }, SDK_ELPH_ORIGIN);
-            this.popRequestFromQueue();
-        }
     }
 
     on(type, callback) {
@@ -183,7 +142,14 @@ class ElphProvider {
     }
 
     sendAsync(payload, callback) {
-        this.addRequestToQueue(payload, callback);
+        this.requests[payload.id] = { payload: payload, callback: callback };
+
+        if (!this.authenticated) {
+            this.runCallback(payload.id, 'User is not authenticated.', null);
+            return;
+        }
+
+        this.iframe.contentWindow.postMessage({ type: "REQUEST", payload: payload }, SDK_ELPH_ORIGIN);
     }
 
     send(payload) {
@@ -191,10 +157,10 @@ class ElphProvider {
         var result;
         switch(method) {
             case "eth_accounts":
-                result = this.account ? [this.account] : []
+                result = this.account ? [this.account] : [];
                 break;
             case "eth_coinbase":
-                result = this.account ? [this.account] : []
+                result = this.account ? [this.account] : [];
                 break;
             case "eth_uninstallFilter":
                 // TODO
@@ -204,7 +170,7 @@ class ElphProvider {
                 result = this.net_version;
                 break;
             default:
-                console.warn("Received synchronous method that is unsupported: ", payload)
+                console.warn("Received synchronous method that is unsupported: ", payload);
                 throw new Error("Unsupported synchronous method");
                 break;
         }

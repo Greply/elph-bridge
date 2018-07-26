@@ -81,7 +81,7 @@
             }
 
             var logout = function() {
-                web3.currentProvider.disconnect();
+                web3.currentProvider.logout();
                 location.reload();
             }
 
@@ -123,15 +123,18 @@
             }
 
             var getAccountInformation = function() {
-                web3.eth.getAccounts(function(error, accounts){
-                    if (error) {
-                        console.error(error);
-                        return;
-                    }
+                var interval = setInterval(function() {
+                    web3.eth.getAccounts(function(error, accounts){
+                        if (error) {
+                            console.error(error);
+                            return;
+                        }
 
-                    address = accounts[0];
-                    updateFrame();
-                });
+                        address = accounts[0];
+                        updateFrame();
+                        clearInterval(interval);
+                    })
+                }, 500)
             }
 
             var attemptAutoConnect = function() {

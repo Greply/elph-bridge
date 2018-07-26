@@ -5,46 +5,32 @@ const SDK_ELPH_ORIGIN = (IS_DEV ? 'http://localhost:9000' : 'https://sdk.elph.co
 
 class ElphProvider {
     constructor(options={'network' : 'mainnet'}) {
+        this.removeOldIframes();
+
+        this.initializeOptions(options);
+        this.initializeState();
+        this.initializeListener();
+
+        this.attemptReauthenticate();
+    }
+
+    removeOldIframes() {
+        let oldModalIframe = document.getElementById('modalIframe');
+        oldModalIframe && oldModalIframe.parentNode.removeChild(oldModalIframe);
+
+        let oldWeb3Iframe = document.getElementById('web3Iframe');
+        oldWeb3Iframe && oldWeb3Iframe.parentNode.removeChild(oldWeb3Iframe);
+    }
+
+
+    initializeOptions(options) {
         this.options = options;
         this.options['elphAuthenticated'] = localStorage.getItem('elphAuthenticated')
         this.options['title'] = document.title;
-
-        this.isElph = true;
-        
-        this.initializeState();
-        this.resetState();
-        this.initializeListener();
-
-        this.attemptReconnect();
-    }
-
-    isConnected() {
-        return this.authenticated;
-    }
-
-    hasPreviouslyConnected() {
-        return localStorage.getItem('elphAuthenticated') === "true";
-    }
-
-    disconnect() {
-        this.resetState();
-        localStorage.removeItem('elphAuthenticated');
-        this.initializeState();
-    }
-
-    attemptReconnect() {
-        if (this.hasPreviouslyConnected()) {
-            this.connect();            
-        }
-    }
-
-    connect() {
-        this.handleRegistration();
-        this.initializeIframe(IFRAME_VERSION);
-        this.initializeModalFrame(IFRAME_VERSION);
     }
 
     initializeState() {
+        this.isElph = true;
         this.registerWindowOpen = true;
         this.authenticated = false;
         this.requests = {};
@@ -52,55 +38,6 @@ class ElphProvider {
         this.account = undefined;
         this.net_version = undefined;
         this.requestQueue = [];
-    }
-
-    resetState() {
-        let oldModalIframe = document.getElementById('modalIframe');
-        if (oldModalIframe) {
-            oldModalIframe.parentNode.removeChild(oldModalIframe);
-        }
-        let oldWeb3Iframe = document.getElementById('web3Iframe');
-        if (oldWeb3Iframe) {
-            oldWeb3Iframe.parentNode.removeChild(oldWeb3Iframe);
-        }
-    }
-
-    handleRegistration() {
-        if (!this.hasPreviouslyConnected()) {
-            this.registerWindow = window.open(ELPH_ORIGIN + '/register','register','resizable,height=650,width=850,left=400,top=200');
-
-            var that = this;
-            this.registerWindowPoll = setInterval(function() {
-                if (that.registerWindow.closed) {
-                    that.registerWindowOpen = false;
-                    if (!that.authenticated) {
-                        that.popRequestFromQueue();
-                    }
-                    clearInterval(that.registerWindowPoll);
-                }
-            }, 1000);
-        }
-    }
-
-    serializeOptions() {
-        var that = this;
-        return Object.keys(this.options).map(function(arg){
-            return arg + '=' + that.options[arg]
-        }).join("&")
-    }
-
-    on(type, callback) { 
-        this.subscriptions.push(callback);
-    }
-
-    runCallback(id, error, result) {
-        var callback = this.requests[id].callback;
-        if (error) {
-            callback(error, null);
-        } else {
-            callback(null, result);
-        }
-        delete this.requests[id];
     }
 
     initializeListener() {
@@ -135,9 +72,64 @@ class ElphProvider {
         });
     }
 
-    initializeModalFrame(iframeVersion) {
+    attemptReauthenticate() {
+        if (this.hasPreviouslyAuthenticated()) {
+            this.login();
+        }
+    }
+
+    isAuthenticated() {
+        return this.authenticated;
+    }
+
+    hasPreviouslyAuthenticated() {
+        return localStorage.getItem('elphAuthenticated') === "true";
+    }
+
+    logout() {
+        this.resetState();
+        localStorage.removeItem('elphAuthenticated');
+        this.initializeState();
+    }
+
+    login() {
+        this.handleRegistration();
+        this.initializeIframe();
+        this.initializeModalFrame();
+    }
+
+    handleRegistration() {
+        if (!this.hasPreviouslyAuthenticated()) {
+            this.registerWindow = window.open(ELPH_ORIGIN + '/register','register','resizable,height=650,width=850,left=400,top=200');
+
+            var that = this;
+            this.registerWindowPoll = setInterval(function() {
+                if (that.registerWindow.closed) {
+                    that.registerWindowOpen = false;
+                    if (!that.authenticated) {
+                        that.popRequestFromQueue();
+                    }
+                    clearInterval(that.registerWindowPoll);
+                }
+            }, 1000);
+        }
+    }
+
+    initializeIframe() {
+        this.iframe = document.createElement('iframe');
+        this.iframe.src = SDK_ELPH_ORIGIN + '/iframes/' + IFRAME_VERSION + '/web3.html?' + Date.now().toString()
+        this.iframe.style.border = 0;
+        this.iframe.style.position = "absolute";
+        this.iframe.style.width = 0;
+        this.iframe.style.height = 0;
+        this.iframe.style.zIndex = -100;
+        this.iframe.id = "web3Iframe";
+        document.body.appendChild(this.iframe);
+    }
+
+    initializeModalFrame() {
         this.modalIframe = document.createElement('iframe');   
-        this.modalIframe.src = SDK_ELPH_ORIGIN + '/iframes/' + iframeVersion + '/modal.html?' + Date.now().toString()
+        this.modalIframe.src = SDK_ELPH_ORIGIN + '/iframes/' + IFRAME_VERSION + '/modal.html?' + Date.now().toString()
         this.modalIframe.style.position = "absolute";  
         this.modalIframe.style.border = 0; 
         this.modalIframe.style.top = 0;    
@@ -149,18 +141,6 @@ class ElphProvider {
         this.modalIframe.allowTransparency="true"; 
         this.modalIframe.id = "modalIframe";
         document.body.appendChild(this.modalIframe);   
-    }
-
-    initializeIframe(iframeVersion) {
-        this.iframe = document.createElement('iframe');
-        this.iframe.src = SDK_ELPH_ORIGIN + '/iframes/' + iframeVersion + '/web3.html?' + Date.now().toString()
-        this.iframe.style.border = 0;
-        this.iframe.style.position = "absolute";
-        this.iframe.style.width = 0;
-        this.iframe.style.height = 0;
-        this.iframe.style.zIndex = -100;
-        this.iframe.id = "web3Iframe";
-        document.body.appendChild(this.iframe);
     }
 
     addRequestToQueue(payload, callback) {
@@ -186,6 +166,20 @@ class ElphProvider {
                 { type: "REQUEST", payload: payload }, SDK_ELPH_ORIGIN);
             this.popRequestFromQueue();
         }
+    }
+
+    on(type, callback) {
+        this.subscriptions.push(callback);
+    }
+
+    runCallback(id, error, result) {
+        var callback = this.requests[id].callback;
+        if (error) {
+            callback(error, null);
+        } else {
+            callback(null, result);
+        }
+        delete this.requests[id];
     }
 
     sendAsync(payload, callback) {

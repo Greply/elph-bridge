@@ -16,7 +16,6 @@
         <link rel="stylesheet" type="text/css" href="application.css">
     </head>
     <body>
-
         <div id='nav-bar' class="nav-container">
             <nav id="menu1" class="bar bar-1" data-scroll-class="100px:pos-fixed">
                 <div class="container">
@@ -118,7 +117,7 @@
             var elphRegister = function() {
                 document.getElementById('elphRegister').innerHTML = "Connecting...";
                 document.getElementById('elphRegister').disabled = true
-                web3.currentProvider.connect();
+                web3.currentProvider.login();
 
                 getAccountInformation();
             }
@@ -136,7 +135,7 @@
             }
 
             var attemptAutoConnect = function() {
-                if (web3.currentProvider.hasPreviouslyConnected()) {
+                if (web3.currentProvider.hasPreviouslyAuthenticated()) {
                     document.getElementById('elphRegister').innerHTML = "Autoconnecting...";
                     document.getElementById('elphRegister').disabled = true
                     document.getElementById('login-status').style.display = 'block';

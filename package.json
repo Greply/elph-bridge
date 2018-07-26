@@ -19,5 +19,6 @@
     "del": "^2.2.2",
     "pascal-case": "^2.0.1",
     "rollup": "^0.36.3"
-  }
+  },
+  "private": true
 }

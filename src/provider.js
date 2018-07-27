@@ -3,6 +3,9 @@ const IS_DEV = false; // Currently just used for local development of the SDK it
 const ELPH_ORIGIN = (IS_DEV ? 'http://localhost:8000' : 'https://elph.com');
 const SDK_ELPH_ORIGIN = (IS_DEV ? 'http://localhost:9000' : 'https://sdk.elph.com');
 
+// Set of methods that need to be rejected if we're un-auth'd.
+const AUTHENTICATED_METHODS = ['eth_sendTransaction', 'eth_sign', 'personal_sign', 'eth_coinbase', 'eth_accounts']
+
 class ElphProvider {
     constructor(options={'network' : 'mainnet'}) {
         this.removeOldIframes();
@@ -12,6 +15,9 @@ class ElphProvider {
         this.initializeListener();
 
         this.attemptReauthenticate();
+
+        this.initializeIframe();
+        this.initializeModalFrame();
     }
 
     removeOldIframes() {
@@ -82,15 +88,13 @@ class ElphProvider {
     }
 
     logout() {
-        this.resetState();
+        this.removeOldIframes();
         localStorage.removeItem('elphAuthenticated');
         this.initializeState();
     }
 
     login() {
         this.handleRegistration();
-        this.initializeIframe();
-        this.initializeModalFrame();
     }
 
     handleRegistration() {
@@ -144,7 +148,7 @@ class ElphProvider {
     sendAsync(payload, callback) {
         this.requests[payload.id] = { payload: payload, callback: callback };
 
-        if (!this.authenticated) {
+        if (!this.authenticated && AUTHENTICATED_METHODS.includes(payload.method)) {
             this.runCallback(payload.id, 'User is not authenticated.', null);
             return;
         }

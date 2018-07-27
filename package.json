@@ -1,6 +1,6 @@
 {
   "name": "elph",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Elph's javascript client side SDK",
   "main": "index.umd.js",
   "module": "index.umd.js",

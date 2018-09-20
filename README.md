@@ -1,11 +1,8 @@
-# [Elph](https://elph.com)
-
-
-Elph, the new platform for decentralized apps.
+# [Elph Bridge SDK](https://elph.com)
 
 ## How does it work?
 
-Elph SDK acts as a standard [web3](https://github.com/ethereum/web3.js/) provider, just like MetaMask or Mist, however doesn't require any additional downloads or installations.
+Elph Bridge acts as a standard [web3](https://github.com/ethereum/web3.js/) provider, just like MetaMask or Mist, however doesn't require any additional downloads or installations.
 
 The SDK talks to the Elph backend to handle user authentication and identity, and then bundles a client-side provider to give the most seamless experience possible for your users.
 
@@ -114,6 +111,14 @@ Sets the Ethereum network all web3 methods will talk to.  Following networks are
 2. ropsten
 3. kovan
 4. rinkeby
+
+<hr>
+
+## Contributing
+
+* If you're interested in contributing to our repository, feel free to reach out, we can help set up a development environment as well.
+
+<hr>
 
 ## Questions
 
